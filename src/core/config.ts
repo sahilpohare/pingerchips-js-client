@@ -93,7 +93,7 @@ function getHttpHost(opts: Options): string {
     return opts.httpHost;
   }
   if (opts.cluster) {
-    return `sockjs-${opts.cluster}.pusher.com`;
+    return `sockjs.pingerchips.com`;
   }
   return Defaults.httpHost;
 }
@@ -106,7 +106,7 @@ function getWebsocketHost(opts: Options): string {
 }
 
 function getWebsocketHostFromCluster(cluster: string): string {
-  return `ws-${cluster}.pusher.com`;
+  return `ws.pingerchips.com`;
 }
 
 function shouldUseTLS(opts: Options): boolean {

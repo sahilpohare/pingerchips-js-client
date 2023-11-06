@@ -41,19 +41,19 @@ var Defaults: DefaultConfig = {
   httpsPort: 443,
   httpPath: '/pusher',
   // DEPRECATED: Stats
-  stats_host: 'stats.pusher.com',
+  stats_host: 'stats.pingerchips.com',
   // DEPRECATED: Other settings
-  authEndpoint: '/pusher/auth',
+  authEndpoint: '/pingerchips/auth',
   authTransport: 'ajax',
   activityTimeout: 120000,
   pongTimeout: 30000,
   unavailableTimeout: 10000,
   userAuthentication: {
-    endpoint: '/pusher/user-auth',
+    endpoint: '/pingerchips/user-auth',
     transport: 'ajax'
   },
   channelAuthorization: {
-    endpoint: '/pusher/auth',
+    endpoint: '/pingerchips/auth',
     transport: 'ajax'
   },
 

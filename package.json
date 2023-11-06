@@ -1,6 +1,6 @@
 {
   "name": "pingerchips-js",
-  "version": "1.0.0c",
+  "version": "1.0.1a",
   "description": "Pingerchips Channels JavaScript library for browsers, React Native, NodeJS and web workers",
   "main": "dist/node/pingerchips.js",
   "browser": "dist/web/pingerchips.js",

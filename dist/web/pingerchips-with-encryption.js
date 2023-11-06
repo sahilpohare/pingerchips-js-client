@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v1.0.0a
+ * Pusher JavaScript Library v1.0.0d
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -2999,7 +2999,7 @@ var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.Scrip
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "1.0.0a",
+    VERSION: "1.0.0d",
     PROTOCOL: 7,
     wsPort: 6001,
     wssPort: 443,
@@ -3008,18 +3008,18 @@ var Defaults = {
     httpPort: 80,
     httpsPort: 443,
     httpPath: '/pusher',
-    stats_host: 'stats.pusher.com',
-    authEndpoint: '/pusher/auth',
+    stats_host: 'stats.pingerchips.com',
+    authEndpoint: '/pingerchips/auth',
     authTransport: 'ajax',
     activityTimeout: 120000,
     pongTimeout: 30000,
     unavailableTimeout: 10000,
     userAuthentication: {
-        endpoint: '/pusher/user-auth',
+        endpoint: '/pingerchips/user-auth',
         transport: 'ajax'
     },
     channelAuthorization: {
-        endpoint: '/pusher/auth',
+        endpoint: '/pingerchips/auth',
         transport: 'ajax'
     },
     cdn_http: "http://js.pusher.com",
@@ -6279,7 +6279,7 @@ function getHttpHost(opts) {
         return opts.httpHost;
     }
     if (opts.cluster) {
-        return `sockjs-${opts.cluster}.pusher.com`;
+        return `sockjs.pingerchips.com`;
     }
     return defaults.httpHost;
 }
@@ -6290,7 +6290,7 @@ function getWebsocketHost(opts) {
     return getWebsocketHostFromCluster(opts.cluster);
 }
 function getWebsocketHostFromCluster(cluster) {
-    return `ws-${cluster}.pusher.com`;
+    return `ws.pingerchips.com`;
 }
 function shouldUseTLS(opts) {
     if (runtime.getProtocol() === 'https:') {
