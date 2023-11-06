@@ -5,21 +5,21 @@ const { merge } = require('webpack-merge');
 var configShared = require('./config.shared');
 
 var filename = configShared.optimization.minimize
-  ? 'pusher.min.js'
-  : 'pusher.js';
+  ? 'pingerchips.min.js'
+  : 'pingerchips.js';
 
-var entry = './src/core/pusher.js';
+var entry = './src/core/pingerchips.js';
 if (process.env.INCLUDE_TWEETNACL === 'true') {
-  entry = './src/core/pusher-with-encryption.js';
-  filename = filename.replace('pusher', 'pusher-with-encryption');
+  entry = './src/core/pingerchips-with-encryption.js';
+  filename = filename.replace('pingerchips', 'pingerchips-with-encryption');
 }
 
 module.exports = merge({}, configShared, {
   entry: {
-    pusher: entry
+    pingerchips: entry
   },
   output: {
-    library: 'Pusher',
+    library: 'Pingerchips',
     path: path.join(__dirname, '../dist/web'),
     filename: filename,
     libraryTarget: 'umd'

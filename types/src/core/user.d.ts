@@ -1,16 +1,16 @@
-import Pusher from './pusher';
 import Channel from './channels/channel';
-import WatchlistFacade from './watchlist';
 import EventsDispatcher from './events/dispatcher';
+import Pingerchips from './pingerchips';
+import WatchlistFacade from './watchlist';
 export default class UserFacade extends EventsDispatcher {
-    pusher: Pusher;
+    pusher: Pingerchips;
     signin_requested: boolean;
     user_data: any;
     serverToUserChannel: Channel;
     signinDonePromise: Promise<any>;
     watchlist: WatchlistFacade;
     private _signinDoneResolve;
-    constructor(pusher: Pusher);
+    constructor(pusher: Pingerchips);
     signin(): void;
     private _signin;
     private _onAuthorize;

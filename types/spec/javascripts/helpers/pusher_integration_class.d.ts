@@ -1,4 +1,4 @@
-import Pusher from '../../../src/core/pusher';
-export default class PusherIntegration extends Pusher {
+import Pingerchips from '../../../src/core/pingerchips';
+export default class PusherIntegration extends Pingerchips {
     static Integration: any;
 }

@@ -1,10 +1,10 @@
 {
-  "name": "pusher-js",
-  "version": "8.3.0",
-  "description": "Pusher Channels JavaScript library for browsers, React Native, NodeJS and web workers",
-  "main": "dist/node/pusher.js",
-  "browser": "dist/web/pusher.js",
-  "react-native": "dist/react-native/pusher.js",
+  "name": "pingerchips-js",
+  "version": "1.0.0c",
+  "description": "Pingerchips Channels JavaScript library for browsers, React Native, NodeJS and web workers",
+  "main": "dist/node/pingerchips.js",
+  "browser": "dist/web/pingerchips.js",
+  "react-native": "dist/react-native/pingerchips.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --config .prettierrc --write 'src/**/*.ts' 'webpack/**/*.js'",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pusher/pusher-js.git"
+    "url": "https://github.com/sahilpohare/pingerchips-js-client"
   },
   "keywords": [
     "pusher",
@@ -24,12 +24,12 @@
     "events",
     "pubsub"
   ],
-  "author": "Pusher",
+  "author": "Pingerchips",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pusher/pusher-js"
+    "url": "https://github.com/sahilpohare/pingerchips-js-client"
   },
-  "homepage": "https://github.com/pusher/pusher-js",
+  "homepage": "https://pingerchips.com",
   "devDependencies": {
     "@react-native-community/netinfo": "^5.9.7",
     "@stablelib/base64": "^1.0.0",

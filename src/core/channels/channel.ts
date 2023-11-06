@@ -1,15 +1,15 @@
-import { default as EventsDispatcher } from '../events/dispatcher';
-import * as Errors from '../errors';
-import Logger from '../logger';
-import Pusher from '../pusher';
-import { PusherEvent } from '../connection/protocol/message-types';
-import Metadata from './metadata';
-import UrlStore from '../utils/url_store';
 import {
-  ChannelAuthorizationData,
-  ChannelAuthorizationCallback
+  ChannelAuthorizationCallback,
+  ChannelAuthorizationData
 } from '../auth/options';
+import { PusherEvent } from '../connection/protocol/message-types';
+import * as Errors from '../errors';
 import { HTTPAuthError } from '../errors';
+import { default as EventsDispatcher } from '../events/dispatcher';
+import Logger from '../logger';
+import Pingerchips from '../pingerchips';
+import UrlStore from '../utils/url_store';
+import Metadata from './metadata';
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -18,17 +18,17 @@ import { HTTPAuthError } from '../errors';
  * - other non-internal events
  *
  * @param {String} name
- * @param {Pusher} pusher
+ * @param {Pingerchips} pusher
  */
 export default class Channel extends EventsDispatcher {
   name: string;
-  pusher: Pusher;
+  pusher: Pingerchips;
   subscribed: boolean;
   subscriptionPending: boolean;
   subscriptionCancelled: boolean;
   subscriptionCount: null;
 
-  constructor(name: string, pusher: Pusher) {
+  constructor(name: string, pusher: Pingerchips) {
     super(function(event, data) {
       Logger.debug('No callbacks on ' + name + ' for ' + event);
     });

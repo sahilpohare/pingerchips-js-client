@@ -1,30 +1,26 @@
-import AbstractRuntime from '../runtimes/interface';
 import Runtime from 'runtime';
-import Util from './util';
-import * as Collections from './utils/collections';
-import Channels from './channels/channels';
+import AbstractRuntime from '../runtimes/interface';
 import Channel from './channels/channel';
+import Channels from './channels/channels';
+import { Config, getConfig } from './config';
+import ConnectionManager from './connection/connection_manager';
+import Defaults from './defaults';
 import { default as EventsDispatcher } from './events/dispatcher';
+import Logger from './logger';
+import { Options, validateOptions } from './options';
+import { defineTransport } from './strategies/strategy_builder';
+import StrategyOptions from './strategies/strategy_options';
+import TimelineLevel from './timeline/level';
 import Timeline from './timeline/timeline';
 import TimelineSender from './timeline/timeline_sender';
-import TimelineLevel from './timeline/level';
-import { defineTransport } from './strategies/strategy_builder';
-import ConnectionManager from './connection/connection_manager';
-import ConnectionManagerOptions from './connection/connection_manager_options';
-import { PeriodicTimer } from './utils/timers';
-import Defaults from './defaults';
-import * as DefaultConfig from './config';
-import Logger from './logger';
-import Factory from './utils/factory';
-import UrlStore from 'core/utils/url_store';
-import { Options, validateOptions } from './options';
-import { Config, getConfig } from './config';
-import StrategyOptions from './strategies/strategy_options';
 import UserFacade from './user';
+import * as Collections from './utils/collections';
+import Factory from './utils/factory';
+import { PeriodicTimer } from './utils/timers';
 
-export default class Pusher {
+export default class Pingerchips {
   /*  STATIC PROPERTIES */
-  static instances: Pusher[] = [];
+  static instances: Pingerchips[] = [];
   static isReady: boolean = false;
   static logToConsole: boolean = false;
 
@@ -35,9 +31,9 @@ export default class Pusher {
   static auth_callbacks: any = (<any>Runtime).auth_callbacks;
 
   static ready() {
-    Pusher.isReady = true;
-    for (var i = 0, l = Pusher.instances.length; i < l; i++) {
-      Pusher.instances[i].connect();
+    Pingerchips.isReady = true;
+    for (var i = 0, l = Pingerchips.instances.length; i < l; i++) {
+      Pingerchips.instances[i].connect();
     }
   }
 
@@ -74,7 +70,7 @@ export default class Pusher {
 
     this.timeline = new Timeline(this.key, this.sessionID, {
       cluster: this.config.cluster,
-      features: Pusher.getClientFeatures(),
+      features: Pingerchips.getClientFeatures(),
       params: this.config.timelineParams || {},
       limit: 50,
       level: TimelineLevel.INFO,
@@ -131,12 +127,12 @@ export default class Pusher {
       Logger.warn(err);
     });
 
-    Pusher.instances.push(this);
-    this.timeline.info({ instances: Pusher.instances.length });
+    Pingerchips.instances.push(this);
+    this.timeline.info({ instances: Pingerchips.instances.length });
 
     this.user = new UserFacade(this);
 
-    if (Pusher.isReady) {
+    if (Pingerchips.isReady) {
       this.connect();
     }
   }
@@ -172,27 +168,27 @@ export default class Pusher {
     }
   }
 
-  bind(event_name: string, callback: Function, context?: any): Pusher {
+  bind(event_name: string, callback: Function, context?: any): Pingerchips {
     this.global_emitter.bind(event_name, callback, context);
     return this;
   }
 
-  unbind(event_name?: string, callback?: Function, context?: any): Pusher {
+  unbind(event_name?: string, callback?: Function, context?: any): Pingerchips {
     this.global_emitter.unbind(event_name, callback, context);
     return this;
   }
 
-  bind_global(callback: Function): Pusher {
+  bind_global(callback: Function): Pingerchips {
     this.global_emitter.bind_global(callback);
     return this;
   }
 
-  unbind_global(callback?: Function): Pusher {
+  unbind_global(callback?: Function): Pingerchips {
     this.global_emitter.unbind_global(callback);
     return this;
   }
 
-  unbind_all(callback?: Function): Pusher {
+  unbind_all(callback?: Function): Pingerchips {
     this.global_emitter.unbind_all();
     return this;
   }
@@ -250,4 +246,4 @@ function checkAppKey(key) {
   }
 }
 
-Runtime.setup(Pusher);
+Runtime.setup(Pingerchips);

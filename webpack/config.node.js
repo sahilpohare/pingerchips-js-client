@@ -5,13 +5,13 @@ var webpack = require('webpack');
 
 module.exports = merge({}, configShared, {
   entry: {
-    pusher: './src/core/pusher-with-encryption.js'
+    pingerchips: './src/core/pingerchips-with-encryption.js'
   },
   output: {
-    library: 'Pusher',
+    library: 'Pingerchips',
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/node'),
-    filename: 'pusher.js'
+    filename: 'pingerchips.js'
   },
   target: 'node',
   resolve: {

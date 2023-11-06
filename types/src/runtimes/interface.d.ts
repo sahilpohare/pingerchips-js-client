@@ -1,19 +1,19 @@
 import { AuthTransports } from '../core/auth/auth_transports';
-import TimelineTransport from '../core/timeline/timeline_transport';
+import { Config } from '../core/config';
 import Ajax from '../core/http/ajax';
-import Reachability from '../core/reachability';
-import TransportsTable from '../core/transports/transports_table';
-import Socket from '../core/socket';
 import HTTPFactory from '../core/http/http_factory';
 import HTTPRequest from '../core/http/http_request';
-import Pusher from '../core/pusher';
-import JSONPRequest from './web/dom/jsonp_request';
+import Pingerchips from '../core/pingerchips';
+import Reachability from '../core/reachability';
+import Socket from '../core/socket';
 import Strategy from '../core/strategies/strategy';
-import { Config } from '../core/config';
 import StrategyOptions from '../core/strategies/strategy_options';
+import TimelineTransport from '../core/timeline/timeline_transport';
+import TransportsTable from '../core/transports/transports_table';
+import JSONPRequest from './web/dom/jsonp_request';
 interface Runtime {
     setup(PusherClass: {
-        new (key: string, options: any): Pusher;
+        new (key: string, options: any): Pingerchips;
         ready(): void;
     }): void;
     getProtocol(): string;

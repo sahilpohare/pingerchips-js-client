@@ -32,7 +32,7 @@ var Defaults: DefaultConfig = {
   VERSION: VERSION,
   PROTOCOL: 7,
 
-  wsPort: 80,
+  wsPort: 6001,
   wssPort: 443,
   wsPath: '',
   // DEPRECATED: SockJS fallback parameters

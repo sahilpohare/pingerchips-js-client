@@ -1,11 +1,11 @@
-import PrivateChannel from './private_channel';
-import Logger from '../logger';
-import Members from './members';
-import Pusher from '../pusher';
 import UrlStore from 'core/utils/url_store';
-import { PusherEvent } from '../connection/protocol/message-types';
-import Metadata from './metadata';
 import { ChannelAuthorizationData } from '../auth/options';
+import { PusherEvent } from '../connection/protocol/message-types';
+import Logger from '../logger';
+import Pingerchips from '../pingerchips';
+import Members from './members';
+import Metadata from './metadata';
+import PrivateChannel from './private_channel';
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -13,9 +13,9 @@ export default class PresenceChannel extends PrivateChannel {
   /** Adds presence channel functionality to private channels.
    *
    * @param {String} name
-   * @param {Pusher} pusher
+   * @param {Pingerchips} pusher
    */
-  constructor(name: string, pusher: Pusher) {
+  constructor(name: string, pusher: Pingerchips) {
     super(name, pusher);
     this.members = new Members();
   }

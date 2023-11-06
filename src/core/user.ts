@@ -1,16 +1,16 @@
-import Pusher from './pusher';
-import Logger from './logger';
 import {
-  UserAuthenticationData,
-  UserAuthenticationCallback
+  UserAuthenticationCallback,
+  UserAuthenticationData
 } from './auth/options';
 import Channel from './channels/channel';
-import WatchlistFacade from './watchlist';
 import EventsDispatcher from './events/dispatcher';
+import Logger from './logger';
+import Pingerchips from './pingerchips';
 import flatPromise from './utils/flat_promise';
+import WatchlistFacade from './watchlist';
 
 export default class UserFacade extends EventsDispatcher {
-  pusher: Pusher;
+  pusher: Pingerchips;
   signin_requested: boolean = false;
   user_data: any = null;
   serverToUserChannel: Channel = null;
@@ -18,7 +18,7 @@ export default class UserFacade extends EventsDispatcher {
   watchlist: WatchlistFacade;
   private _signinDoneResolve: Function = null;
 
-  public constructor(pusher: Pusher) {
+  public constructor(pusher: Pingerchips) {
     super(function(eventName, data) {
       Logger.debug('No callbacks on user for ' + eventName);
     });

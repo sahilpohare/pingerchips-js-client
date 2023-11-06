@@ -1,13 +1,13 @@
-# Pusher Channels Javascript Client
+# Pingerchips Channels Javascript Client
 
 ![test badge](https://github.com/pusher/pusher-js/workflows/test/badge.svg)
 
-This Pusher Channels client library supports web browsers, web workers and Node.js
+This Pingerchips Channels client library supports web browsers, web workers and Node.js
 
-If you're looking for the Pusher Channels server library for Node.js, use
+If you're looking for the Pingerchips Channels server library for Node.js, use
 [pusher-http-node](https://github.com/pusher/pusher-http-node) instead.
 
-For tutorials and more in-depth information about Pusher Channels, visit
+For tutorials and more in-depth information about Pingerchips Channels, visit
 our [official docs](https://pusher.com/docs/javascript_quick_start).
 
 ## Usage Overview
@@ -54,7 +54,7 @@ The following topics are covered:
 
 ### Web
 
-If you're using Pusher Channels on a web page, you can install the library via:
+If you're using Pingerchips Channels on a web page, you can install the library via:
 
 #### Encrypted Channel Support
 
@@ -78,25 +78,25 @@ yarn add pusher-js
 Then:
 
 ```javascript
-import Pusher from 'pusher-js';
+import Pingerchips from 'pusher-js';
 ```
 
 If you'd like to use encrypted channels:
 
 ```javascript
-import Pusher from 'pusher-js/with-encryption';
+import Pingerchips from 'pusher-js/with-encryption';
 ```
 
 Or, if you're not using ES6 modules:
 
 ```javascript
-const Pusher = require('pusher-js');
+const Pingerchips = require('pusher-js');
 ```
 
 If you'd like to use encrypted channels:
 
 ```javascript
-const Pusher = require('pusher-js/with-encryption');
+const Pingerchips = require('pusher-js/with-encryption');
 ```
 
 #### CDN
@@ -135,10 +135,10 @@ out of the box but if you need access to specific types you can import them
 like so:
 
 ```
-import Pusher from 'pusher-js';
-import * as PusherTypes from 'pusher-js';
+import Pingerchips from 'pusher-js';
+import * as PingerchipsTypes from 'pusher-js';
 
-var presenceChannel: PusherTypes.PresenceChannel;
+var presenceChannel: PingerchipsTypes.PresenceChannel;
 ...
 ```
 
@@ -167,13 +167,13 @@ importScripts('https://js.pusher.com/7.0/pusher-with-encryption.worker.min.js');
 If you're building your worker with a bundler, you can import the worker entrypoint
 
 ```
-import Pusher from 'pusher-js/worker'
+import Pingerchips from 'pusher-js/worker'
 ```
 
 If you'd like to use encrypted channels:
 
 ```
-import Pusher from 'pusher-js/worker/with-encryption'
+import Pingerchips from 'pusher-js/worker/with-encryption'
 ```
 
 ### Node.js
@@ -181,7 +181,7 @@ import Pusher from 'pusher-js/worker/with-encryption'
 Having installed `pusher-js` via an NPM-compatible package manager, run:
 
 ```javascript
-import Pusher from 'pusher-js';
+import Pingerchips from 'pusher-js';
 ```
 
 Notes:
@@ -192,19 +192,19 @@ Notes:
 ## Initialization
 
 ```js
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
 });
 ```
 
-You can get your `APP_KEY` and `APP_CLUSTER` from the [Pusher Channels dashboard](https://dashboard.pusher.com/).
+You can get your `APP_KEY` and `APP_CLUSTER` from the [Pingerchips Channels dashboard](https://dashboard.pusher.com/).
 
 ## Configuration
 
-There are a number of configuration parameters which can be set for the client, which can be passed as an object to the Pusher constructor, i.e.:
+There are a number of configuration parameters which can be set for the client, which can be passed as an object to the Pingerchips constructor, i.e.:
 
 ```js
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
   channelAuthorization: {
     endpoint: 'http://example.com/pusher/auth'
@@ -271,19 +271,19 @@ For more information see [authorizing users](https://pusher.com/docs/channels/se
 Specifies the cluster that pusher-js should connect to. [If you'd like to see a full list of our clusters, click here](https://pusher.com/docs/clusters). If you do not specify a cluster, `mt1` will be used by default.
 
 ```js
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
 });
 ```
 
 #### `disableStats` (deprecated) (Boolean)
 
-Disables stats collection, so that connection metrics are not submitted to Pusher’s servers. These stats are used for internal monitoring only and they do not affect the account stats.
+Disables stats collection, so that connection metrics are not submitted to Pingerchips’s servers. These stats are used for internal monitoring only and they do not affect the account stats.
 *This option is deprecated since stats collection is now disabled by default*
 
 #### `enableStats` (Boolean)
 
-Enables stats collection, so that connection metrics are submitted to Pusher’s servers. These stats can help pusher engineers debug connection issues.
+Enables stats collection, so that connection metrics are submitted to Pingerchips’s servers. These stats can help pusher engineers debug connection issues.
 
 #### `enabledTransports` (Array)
 
@@ -291,7 +291,7 @@ Specifies which transports should be used by pusher-js to establish a connection
 
 ```js
 // Only use WebSockets
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
   enabledTransports: ['ws']
 });
@@ -301,7 +301,7 @@ Note: if you intend to use secure websockets, or `wss`, you can not simply speci
 
 ```js
 // Only use secure WebSockets
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
   enabledTransports: ['ws'],
   forceTLS: true
@@ -314,13 +314,13 @@ Specifies which transports must not be used by pusher-js to establish a connecti
 
 ```js
 // Use all transports except for sockjs
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
   disabledTransports: ['sockjs']
 });
 
 // Only use WebSockets
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
   enabledTransports: ['ws', 'xhr_streaming'],
   disabledTransports: ['xhr_streaming']
@@ -329,7 +329,7 @@ const pusher = new Pusher(APP_KEY, {
 
 #### `wsHost`, `wsPort`, `wssPort`, `httpHost`, `httpPort`, `httpsPort`
 
-These can be changed to point to alternative Pusher Channels URLs (used internally for our staging server).
+These can be changed to point to alternative Pingerchips Channels URLs (used internally for our staging server).
 
 #### `wsPath`
 
@@ -349,28 +349,28 @@ Time before the connection is terminated after a ping is sent to the server. Def
 
 ## Global configuration
 
-### `Pusher.logToConsole` (Boolean)
+### `Pingerchips.logToConsole` (Boolean)
 
 Enables logging to the browser console via calls to `console.log`.
 
-### `Pusher.log` (Function)
+### `Pingerchips.log` (Function)
 
 Assign a custom log handler for the pusher-js library logging. For example:
 
 ```js
-Pusher.log = (msg) => {
+Pingerchips.log = (msg) => {
   console.log(msg);
 };
 ```
 
-By setting the `log` property you also override the use of `Pusher.enableLogging`.
+By setting the `log` property you also override the use of `Pingerchips.enableLogging`.
 
 ## Connection
 
-A connection to Pusher Channels is established by providing your `APP_KEY` and `APP_CLUSTER` to the constructor function:
+A connection to Pingerchips Channels is established by providing your `APP_KEY` and `APP_CLUSTER` to the constructor function:
 
 ```js
-const pusher = new Pusher(APP_KEY, {
+const pusher = new Pingerchips(APP_KEY, {
   cluster: APP_CLUSTER,
 });
 ```
@@ -380,7 +380,7 @@ This returns a pusher object which can then be used to subscribe to channels.
 One reason this connection might fail is your account being over its' limits. You can detect this in the client by binding to the `error` event on the `pusher.connection` object. For example:
 
 ```js
-const pusher = new Pusher('app_key', { cluster: APP_CLUSTER });
+const pusher = new Pingerchips('app_key', { cluster: APP_CLUSTER });
 pusher.connection.bind( 'error', function( err ) {
   if( err.data.code === 4004 ) {
     log('Over limit!');
@@ -482,12 +482,12 @@ channel.bind('new-message', function (data) {
 });
 ```
 
-We can also provide the `this` value when calling a handler as a third optional parameter. The following logs "hi Pusher" when "my-event" is fired.
+We can also provide the `this` value when calling a handler as a third optional parameter. The following logs "hi Pingerchips" when "my-event" is fired.
 
 ```js
 channel.bind('my-event', function () {
   console.log(`hi ${this.name}`);
-}, { name: 'Pusher' });
+}, { name: 'Pingerchips' });
 ```
 
 For client-events on presence channels, bound callbacks will be called with an additional argument. This argument is an object containing the `user_id` of the user who triggered the event
@@ -572,7 +572,7 @@ pusher.connection.bind('state_change', function(states) {
 
 ## Connection Events
 
-To listen for when you connect to Pusher Channels:
+To listen for when you connect to Pingerchips Channels:
 
 ```js
 pusher.connection.bind('connected', callback);
@@ -608,7 +608,7 @@ Minified files should have `.min` in their names, as in the `dist/web` directory
 
 ## SockJS compatibility
 
-Most browsers have a limit of 6 simultaneous connections to a single domain, but Internet Explorer 6 and 7 have a limit of just 2. This means that you can only use a single Pusher Channels connection in these browsers, because SockJS requires an HTTP connection for incoming data and another one for sending. Opening the second connection will break the first one as the client won't be able to respond to ping messages and get disconnected eventually.
+Most browsers have a limit of 6 simultaneous connections to a single domain, but Internet Explorer 6 and 7 have a limit of just 2. This means that you can only use a single Pingerchips Channels connection in these browsers, because SockJS requires an HTTP connection for incoming data and another one for sending. Opening the second connection will break the first one as the client won't be able to respond to ping messages and get disconnected eventually.
 
 All other browsers work fine with two or three connections.
 

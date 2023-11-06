@@ -1306,49 +1306,6 @@ var Transports = {
 };
 /* harmony default export */ var transports = (Transports);
 
-// CONCATENATED MODULE: ./src/core/transports/assistant_to_the_transport_manager.ts
-
-
-class assistant_to_the_transport_manager_AssistantToTheTransportManager {
-    constructor(manager, transport, options) {
-        this.manager = manager;
-        this.transport = transport;
-        this.minPingDelay = options.minPingDelay;
-        this.maxPingDelay = options.maxPingDelay;
-        this.pingDelay = undefined;
-    }
-    createConnection(name, priority, key, options) {
-        options = extend({}, options, {
-            activityTimeout: this.pingDelay
-        });
-        var connection = this.transport.createConnection(name, priority, key, options);
-        var openTimestamp = null;
-        var onOpen = function () {
-            connection.unbind('open', onOpen);
-            connection.bind('closed', onClosed);
-            openTimestamp = util.now();
-        };
-        var onClosed = closeEvent => {
-            connection.unbind('closed', onClosed);
-            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-                this.manager.reportDeath();
-            }
-            else if (!closeEvent.wasClean && openTimestamp) {
-                var lifespan = util.now() - openTimestamp;
-                if (lifespan < 2 * this.maxPingDelay) {
-                    this.manager.reportDeath();
-                    this.pingDelay = Math.max(lifespan / 2, this.minPingDelay);
-                }
-            }
-        };
-        connection.bind('open', onOpen);
-        return connection;
-    }
-    isSupported(environment) {
-        return this.manager.isAlive() && this.transport.isSupported(environment);
-    }
-}
-
 // CONCATENATED MODULE: ./src/core/connection/protocol/protocol.ts
 const Protocol = {
     decodeMessage: function (messageEvent) {
@@ -1604,18 +1561,46 @@ class handshake_Handshake {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/timeline/timeline_sender.ts
+// CONCATENATED MODULE: ./src/core/transports/assistant_to_the_transport_manager.ts
 
-class timeline_sender_TimelineSender {
-    constructor(timeline, options) {
-        this.timeline = timeline;
-        this.options = options || {};
+
+class assistant_to_the_transport_manager_AssistantToTheTransportManager {
+    constructor(manager, transport, options) {
+        this.manager = manager;
+        this.transport = transport;
+        this.minPingDelay = options.minPingDelay;
+        this.maxPingDelay = options.maxPingDelay;
+        this.pingDelay = undefined;
     }
-    send(useTLS, callback) {
-        if (this.timeline.isEmpty()) {
-            return;
-        }
-        this.timeline.send(worker_runtime.TimelineTransport.getAgent(this, useTLS), callback);
+    createConnection(name, priority, key, options) {
+        options = extend({}, options, {
+            activityTimeout: this.pingDelay
+        });
+        var connection = this.transport.createConnection(name, priority, key, options);
+        var openTimestamp = null;
+        var onOpen = function () {
+            connection.unbind('open', onOpen);
+            connection.bind('closed', onClosed);
+            openTimestamp = util.now();
+        };
+        var onClosed = closeEvent => {
+            connection.unbind('closed', onClosed);
+            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
+                this.manager.reportDeath();
+            }
+            else if (!closeEvent.wasClean && openTimestamp) {
+                var lifespan = util.now() - openTimestamp;
+                if (lifespan < 2 * this.maxPingDelay) {
+                    this.manager.reportDeath();
+                    this.pingDelay = Math.max(lifespan / 2, this.minPingDelay);
+                }
+            }
+        };
+        connection.bind('open', onOpen);
+        return connection;
+    }
+    isSupported(environment) {
+        return this.manager.isAlive() && this.transport.isSupported(environment);
     }
 }
 
@@ -1817,6 +1802,67 @@ class channel_Channel extends dispatcher_Dispatcher {
     }
 }
 
+// CONCATENATED MODULE: ./src/core/channels/channels.ts
+
+
+
+
+class channels_Channels {
+    constructor() {
+        this.channels = {};
+    }
+    add(name, pusher) {
+        if (!this.channels[name]) {
+            this.channels[name] = createChannel(name, pusher);
+        }
+        return this.channels[name];
+    }
+    all() {
+        return values(this.channels);
+    }
+    find(name) {
+        return this.channels[name];
+    }
+    remove(name) {
+        var channel = this.channels[name];
+        delete this.channels[name];
+        return channel;
+    }
+    disconnect() {
+        objectApply(this.channels, function (channel) {
+            channel.disconnect();
+        });
+    }
+}
+function createChannel(name, pusher) {
+    if (name.indexOf('private-encrypted-') === 0) {
+        if (pusher.config.nacl) {
+            return factory.createEncryptedChannel(name, pusher, pusher.config.nacl);
+        }
+        let errMsg = 'Tried to subscribe to a private-encrypted- channel but no nacl implementation available';
+        let suffix = url_store.buildLogSuffix('encryptedChannelSupport');
+        throw new UnsupportedFeature(`${errMsg}. ${suffix}`);
+    }
+    else if (name.indexOf('private-') === 0) {
+        return factory.createPrivateChannel(name, pusher);
+    }
+    else if (name.indexOf('presence-') === 0) {
+        return factory.createPresenceChannel(name, pusher);
+    }
+    else if (name.indexOf('#') === 0) {
+        throw new BadChannelName('Cannot create a channel with name "' + name + '".');
+    }
+    else {
+        return factory.createChannel(name, pusher);
+    }
+}
+
+// EXTERNAL MODULE: ./node_modules/@stablelib/base64/lib/base64.js
+var base64 = __webpack_require__(0);
+
+// EXTERNAL MODULE: ./node_modules/@stablelib/utf8/lib/utf8.js
+var utf8 = __webpack_require__(1);
+
 // CONCATENATED MODULE: ./src/core/channels/private_channel.ts
 
 class private_channel_PrivateChannel extends channel_Channel {
@@ -1825,6 +1871,98 @@ class private_channel_PrivateChannel extends channel_Channel {
             channelName: this.name,
             socketId: socketId
         }, callback);
+    }
+}
+
+// CONCATENATED MODULE: ./src/core/channels/encrypted_channel.ts
+
+
+
+
+
+class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel {
+    constructor(name, pusher, nacl) {
+        super(name, pusher);
+        this.key = null;
+        this.nacl = nacl;
+    }
+    authorize(socketId, callback) {
+        super.authorize(socketId, (error, authData) => {
+            if (error) {
+                callback(error, authData);
+                return;
+            }
+            let sharedSecret = authData['shared_secret'];
+            if (!sharedSecret) {
+                callback(new Error(`No shared_secret key in auth payload for encrypted channel: ${this.name}`), null);
+                return;
+            }
+            this.key = Object(base64["decode"])(sharedSecret);
+            delete authData['shared_secret'];
+            callback(null, authData);
+        });
+    }
+    trigger(event, data) {
+        throw new UnsupportedFeature('Client events are not currently supported for encrypted channels');
+    }
+    handleEvent(event) {
+        var eventName = event.event;
+        var data = event.data;
+        if (eventName.indexOf('pusher_internal:') === 0 ||
+            eventName.indexOf('pusher:') === 0) {
+            super.handleEvent(event);
+            return;
+        }
+        this.handleEncryptedEvent(eventName, data);
+    }
+    handleEncryptedEvent(event, data) {
+        if (!this.key) {
+            logger.debug('Received encrypted event before key has been retrieved from the authEndpoint');
+            return;
+        }
+        if (!data.ciphertext || !data.nonce) {
+            logger.error('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' +
+                data);
+            return;
+        }
+        let cipherText = Object(base64["decode"])(data.ciphertext);
+        if (cipherText.length < this.nacl.secretbox.overheadLength) {
+            logger.error(`Expected encrypted event ciphertext length to be ${this.nacl.secretbox.overheadLength}, got: ${cipherText.length}`);
+            return;
+        }
+        let nonce = Object(base64["decode"])(data.nonce);
+        if (nonce.length < this.nacl.secretbox.nonceLength) {
+            logger.error(`Expected encrypted event nonce length to be ${this.nacl.secretbox.nonceLength}, got: ${nonce.length}`);
+            return;
+        }
+        let bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
+        if (bytes === null) {
+            logger.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+            this.authorize(this.pusher.connection.socket_id, (error, authData) => {
+                if (error) {
+                    logger.error(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
+                    return;
+                }
+                bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
+                if (bytes === null) {
+                    logger.error(`Failed to decrypt event with new key. Dropping encrypted event`);
+                    return;
+                }
+                this.emit(event, this.getDataToEmit(bytes));
+                return;
+            });
+            return;
+        }
+        this.emit(event, this.getDataToEmit(bytes));
+    }
+    getDataToEmit(bytes) {
+        let raw = Object(utf8["decode"])(bytes);
+        try {
+            return JSON.parse(raw);
+        }
+        catch (_a) {
+            return raw;
+        }
     }
 }
 
@@ -1976,104 +2114,6 @@ class presence_channel_PresenceChannel extends private_channel_PrivateChannel {
     disconnect() {
         this.members.reset();
         super.disconnect();
-    }
-}
-
-// EXTERNAL MODULE: ./node_modules/@stablelib/utf8/lib/utf8.js
-var utf8 = __webpack_require__(1);
-
-// EXTERNAL MODULE: ./node_modules/@stablelib/base64/lib/base64.js
-var base64 = __webpack_require__(0);
-
-// CONCATENATED MODULE: ./src/core/channels/encrypted_channel.ts
-
-
-
-
-
-class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel {
-    constructor(name, pusher, nacl) {
-        super(name, pusher);
-        this.key = null;
-        this.nacl = nacl;
-    }
-    authorize(socketId, callback) {
-        super.authorize(socketId, (error, authData) => {
-            if (error) {
-                callback(error, authData);
-                return;
-            }
-            let sharedSecret = authData['shared_secret'];
-            if (!sharedSecret) {
-                callback(new Error(`No shared_secret key in auth payload for encrypted channel: ${this.name}`), null);
-                return;
-            }
-            this.key = Object(base64["decode"])(sharedSecret);
-            delete authData['shared_secret'];
-            callback(null, authData);
-        });
-    }
-    trigger(event, data) {
-        throw new UnsupportedFeature('Client events are not currently supported for encrypted channels');
-    }
-    handleEvent(event) {
-        var eventName = event.event;
-        var data = event.data;
-        if (eventName.indexOf('pusher_internal:') === 0 ||
-            eventName.indexOf('pusher:') === 0) {
-            super.handleEvent(event);
-            return;
-        }
-        this.handleEncryptedEvent(eventName, data);
-    }
-    handleEncryptedEvent(event, data) {
-        if (!this.key) {
-            logger.debug('Received encrypted event before key has been retrieved from the authEndpoint');
-            return;
-        }
-        if (!data.ciphertext || !data.nonce) {
-            logger.error('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' +
-                data);
-            return;
-        }
-        let cipherText = Object(base64["decode"])(data.ciphertext);
-        if (cipherText.length < this.nacl.secretbox.overheadLength) {
-            logger.error(`Expected encrypted event ciphertext length to be ${this.nacl.secretbox.overheadLength}, got: ${cipherText.length}`);
-            return;
-        }
-        let nonce = Object(base64["decode"])(data.nonce);
-        if (nonce.length < this.nacl.secretbox.nonceLength) {
-            logger.error(`Expected encrypted event nonce length to be ${this.nacl.secretbox.nonceLength}, got: ${nonce.length}`);
-            return;
-        }
-        let bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
-        if (bytes === null) {
-            logger.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
-            this.authorize(this.pusher.connection.socket_id, (error, authData) => {
-                if (error) {
-                    logger.error(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
-                    return;
-                }
-                bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
-                if (bytes === null) {
-                    logger.error(`Failed to decrypt event with new key. Dropping encrypted event`);
-                    return;
-                }
-                this.emit(event, this.getDataToEmit(bytes));
-                return;
-            });
-            return;
-        }
-        this.emit(event, this.getDataToEmit(bytes));
-    }
-    getDataToEmit(bytes) {
-        let raw = Object(utf8["decode"])(bytes);
-        try {
-            return JSON.parse(raw);
-        }
-        catch (_a) {
-            return raw;
-        }
     }
 }
 
@@ -2333,58 +2373,18 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/channels/channels.ts
+// CONCATENATED MODULE: ./src/core/timeline/timeline_sender.ts
 
-
-
-
-class channels_Channels {
-    constructor() {
-        this.channels = {};
+class timeline_sender_TimelineSender {
+    constructor(timeline, options) {
+        this.timeline = timeline;
+        this.options = options || {};
     }
-    add(name, pusher) {
-        if (!this.channels[name]) {
-            this.channels[name] = createChannel(name, pusher);
+    send(useTLS, callback) {
+        if (this.timeline.isEmpty()) {
+            return;
         }
-        return this.channels[name];
-    }
-    all() {
-        return values(this.channels);
-    }
-    find(name) {
-        return this.channels[name];
-    }
-    remove(name) {
-        var channel = this.channels[name];
-        delete this.channels[name];
-        return channel;
-    }
-    disconnect() {
-        objectApply(this.channels, function (channel) {
-            channel.disconnect();
-        });
-    }
-}
-function createChannel(name, pusher) {
-    if (name.indexOf('private-encrypted-') === 0) {
-        if (pusher.config.nacl) {
-            return factory.createEncryptedChannel(name, pusher, pusher.config.nacl);
-        }
-        let errMsg = 'Tried to subscribe to a private-encrypted- channel but no nacl implementation available';
-        let suffix = url_store.buildLogSuffix('encryptedChannelSupport');
-        throw new UnsupportedFeature(`${errMsg}. ${suffix}`);
-    }
-    else if (name.indexOf('private-') === 0) {
-        return factory.createPrivateChannel(name, pusher);
-    }
-    else if (name.indexOf('presence-') === 0) {
-        return factory.createPresenceChannel(name, pusher);
-    }
-    else if (name.indexOf('#') === 0) {
-        throw new BadChannelName('Cannot create a channel with name "' + name + '".');
-    }
-    else {
-        return factory.createChannel(name, pusher);
+        this.timeline.send(worker_runtime.TimelineTransport.getAgent(this, useTLS), callback);
     }
 }
 
@@ -3394,231 +3394,6 @@ const Worker = {
 };
 /* harmony default export */ var worker_runtime = (Worker);
 
-// CONCATENATED MODULE: ./src/core/timeline/level.ts
-var TimelineLevel;
-(function (TimelineLevel) {
-    TimelineLevel[TimelineLevel["ERROR"] = 3] = "ERROR";
-    TimelineLevel[TimelineLevel["INFO"] = 6] = "INFO";
-    TimelineLevel[TimelineLevel["DEBUG"] = 7] = "DEBUG";
-})(TimelineLevel || (TimelineLevel = {}));
-/* harmony default export */ var timeline_level = (TimelineLevel);
-
-// CONCATENATED MODULE: ./src/core/timeline/timeline.ts
-
-
-
-class timeline_Timeline {
-    constructor(key, session, options) {
-        this.key = key;
-        this.session = session;
-        this.events = [];
-        this.options = options || {};
-        this.sent = 0;
-        this.uniqueID = 0;
-    }
-    log(level, event) {
-        if (level <= this.options.level) {
-            this.events.push(extend({}, event, { timestamp: util.now() }));
-            if (this.options.limit && this.events.length > this.options.limit) {
-                this.events.shift();
-            }
-        }
-    }
-    error(event) {
-        this.log(timeline_level.ERROR, event);
-    }
-    info(event) {
-        this.log(timeline_level.INFO, event);
-    }
-    debug(event) {
-        this.log(timeline_level.DEBUG, event);
-    }
-    isEmpty() {
-        return this.events.length === 0;
-    }
-    send(sendfn, callback) {
-        var data = extend({
-            session: this.session,
-            bundle: this.sent + 1,
-            key: this.key,
-            lib: 'js',
-            version: this.options.version,
-            cluster: this.options.cluster,
-            features: this.options.features,
-            timeline: this.events
-        }, this.options.params);
-        this.events = [];
-        sendfn(data, (error, result) => {
-            if (!error) {
-                this.sent++;
-            }
-            if (callback) {
-                callback(error, result);
-            }
-        });
-        return true;
-    }
-    generateUniqueID() {
-        this.uniqueID++;
-        return this.uniqueID;
-    }
-}
-
-// CONCATENATED MODULE: ./src/core/strategies/transport_strategy.ts
-
-
-
-
-class transport_strategy_TransportStrategy {
-    constructor(name, priority, transport, options) {
-        this.name = name;
-        this.priority = priority;
-        this.transport = transport;
-        this.options = options || {};
-    }
-    isSupported() {
-        return this.transport.isSupported({
-            useTLS: this.options.useTLS
-        });
-    }
-    connect(minPriority, callback) {
-        if (!this.isSupported()) {
-            return failAttempt(new UnsupportedStrategy(), callback);
-        }
-        else if (this.priority < minPriority) {
-            return failAttempt(new TransportPriorityTooLow(), callback);
-        }
-        var connected = false;
-        var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);
-        var handshake = null;
-        var onInitialized = function () {
-            transport.unbind('initialized', onInitialized);
-            transport.connect();
-        };
-        var onOpen = function () {
-            handshake = factory.createHandshake(transport, function (result) {
-                connected = true;
-                unbindListeners();
-                callback(null, result);
-            });
-        };
-        var onError = function (error) {
-            unbindListeners();
-            callback(error);
-        };
-        var onClosed = function () {
-            unbindListeners();
-            var serializedTransport;
-            serializedTransport = safeJSONStringify(transport);
-            callback(new TransportClosed(serializedTransport));
-        };
-        var unbindListeners = function () {
-            transport.unbind('initialized', onInitialized);
-            transport.unbind('open', onOpen);
-            transport.unbind('error', onError);
-            transport.unbind('closed', onClosed);
-        };
-        transport.bind('initialized', onInitialized);
-        transport.bind('open', onOpen);
-        transport.bind('error', onError);
-        transport.bind('closed', onClosed);
-        transport.initialize();
-        return {
-            abort: () => {
-                if (connected) {
-                    return;
-                }
-                unbindListeners();
-                if (handshake) {
-                    handshake.close();
-                }
-                else {
-                    transport.close();
-                }
-            },
-            forceMinPriority: p => {
-                if (connected) {
-                    return;
-                }
-                if (this.priority < p) {
-                    if (handshake) {
-                        handshake.close();
-                    }
-                    else {
-                        transport.close();
-                    }
-                }
-            }
-        };
-    }
-}
-function failAttempt(error, callback) {
-    util.defer(function () {
-        callback(error);
-    });
-    return {
-        abort: function () { },
-        forceMinPriority: function () { }
-    };
-}
-
-// CONCATENATED MODULE: ./src/core/strategies/strategy_builder.ts
-
-
-
-
-
-const { Transports: strategy_builder_Transports } = worker_runtime;
-var strategy_builder_defineTransport = function (config, name, type, priority, options, manager) {
-    var transportClass = strategy_builder_Transports[type];
-    if (!transportClass) {
-        throw new UnsupportedTransport(type);
-    }
-    var enabled = (!config.enabledTransports ||
-        arrayIndexOf(config.enabledTransports, name) !== -1) &&
-        (!config.disabledTransports ||
-            arrayIndexOf(config.disabledTransports, name) === -1);
-    var transport;
-    if (enabled) {
-        options = Object.assign({ ignoreNullOrigin: config.ignoreNullOrigin }, options);
-        transport = new transport_strategy_TransportStrategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, options);
-    }
-    else {
-        transport = strategy_builder_UnsupportedStrategy;
-    }
-    return transport;
-};
-var strategy_builder_UnsupportedStrategy = {
-    isSupported: function () {
-        return false;
-    },
-    connect: function (_, callback) {
-        var deferred = util.defer(function () {
-            callback(new UnsupportedStrategy());
-        });
-        return {
-            abort: function () {
-                deferred.ensureAborted();
-            },
-            forceMinPriority: function () { }
-        };
-    }
-};
-
-// CONCATENATED MODULE: ./src/core/options.ts
-
-function validateOptions(options) {
-    if (options == null) {
-        throw 'You must pass an options object';
-    }
-    if (options.cluster == null) {
-        throw 'Options object must provide a cluster';
-    }
-    if ('disableStats' in options) {
-        logger.warn('The disableStats option is deprecated in favor of enableStats');
-    }
-}
-
 // CONCATENATED MODULE: ./src/core/auth/options.ts
 var AuthRequestType;
 (function (AuthRequestType) {
@@ -3827,6 +3602,242 @@ function buildChannelAuthorizer(opts, pusher) {
     return channel_authorizer(channelAuthorization);
 }
 
+// CONCATENATED MODULE: ./src/core/options.ts
+
+function validateOptions(options) {
+    if (options == null) {
+        throw 'You must pass an options object';
+    }
+    if (options.cluster == null) {
+        throw 'Options object must provide a cluster';
+    }
+    if ('disableStats' in options) {
+        logger.warn('The disableStats option is deprecated in favor of enableStats');
+    }
+}
+
+// CONCATENATED MODULE: ./src/core/strategies/transport_strategy.ts
+
+
+
+
+class transport_strategy_TransportStrategy {
+    constructor(name, priority, transport, options) {
+        this.name = name;
+        this.priority = priority;
+        this.transport = transport;
+        this.options = options || {};
+    }
+    isSupported() {
+        return this.transport.isSupported({
+            useTLS: this.options.useTLS
+        });
+    }
+    connect(minPriority, callback) {
+        if (!this.isSupported()) {
+            return failAttempt(new UnsupportedStrategy(), callback);
+        }
+        else if (this.priority < minPriority) {
+            return failAttempt(new TransportPriorityTooLow(), callback);
+        }
+        var connected = false;
+        var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);
+        var handshake = null;
+        var onInitialized = function () {
+            transport.unbind('initialized', onInitialized);
+            transport.connect();
+        };
+        var onOpen = function () {
+            handshake = factory.createHandshake(transport, function (result) {
+                connected = true;
+                unbindListeners();
+                callback(null, result);
+            });
+        };
+        var onError = function (error) {
+            unbindListeners();
+            callback(error);
+        };
+        var onClosed = function () {
+            unbindListeners();
+            var serializedTransport;
+            serializedTransport = safeJSONStringify(transport);
+            callback(new TransportClosed(serializedTransport));
+        };
+        var unbindListeners = function () {
+            transport.unbind('initialized', onInitialized);
+            transport.unbind('open', onOpen);
+            transport.unbind('error', onError);
+            transport.unbind('closed', onClosed);
+        };
+        transport.bind('initialized', onInitialized);
+        transport.bind('open', onOpen);
+        transport.bind('error', onError);
+        transport.bind('closed', onClosed);
+        transport.initialize();
+        return {
+            abort: () => {
+                if (connected) {
+                    return;
+                }
+                unbindListeners();
+                if (handshake) {
+                    handshake.close();
+                }
+                else {
+                    transport.close();
+                }
+            },
+            forceMinPriority: p => {
+                if (connected) {
+                    return;
+                }
+                if (this.priority < p) {
+                    if (handshake) {
+                        handshake.close();
+                    }
+                    else {
+                        transport.close();
+                    }
+                }
+            }
+        };
+    }
+}
+function failAttempt(error, callback) {
+    util.defer(function () {
+        callback(error);
+    });
+    return {
+        abort: function () { },
+        forceMinPriority: function () { }
+    };
+}
+
+// CONCATENATED MODULE: ./src/core/strategies/strategy_builder.ts
+
+
+
+
+
+const { Transports: strategy_builder_Transports } = worker_runtime;
+var strategy_builder_defineTransport = function (config, name, type, priority, options, manager) {
+    var transportClass = strategy_builder_Transports[type];
+    if (!transportClass) {
+        throw new UnsupportedTransport(type);
+    }
+    var enabled = (!config.enabledTransports ||
+        arrayIndexOf(config.enabledTransports, name) !== -1) &&
+        (!config.disabledTransports ||
+            arrayIndexOf(config.disabledTransports, name) === -1);
+    var transport;
+    if (enabled) {
+        options = Object.assign({ ignoreNullOrigin: config.ignoreNullOrigin }, options);
+        transport = new transport_strategy_TransportStrategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, options);
+    }
+    else {
+        transport = strategy_builder_UnsupportedStrategy;
+    }
+    return transport;
+};
+var strategy_builder_UnsupportedStrategy = {
+    isSupported: function () {
+        return false;
+    },
+    connect: function (_, callback) {
+        var deferred = util.defer(function () {
+            callback(new UnsupportedStrategy());
+        });
+        return {
+            abort: function () {
+                deferred.ensureAborted();
+            },
+            forceMinPriority: function () { }
+        };
+    }
+};
+
+// CONCATENATED MODULE: ./src/core/timeline/level.ts
+var TimelineLevel;
+(function (TimelineLevel) {
+    TimelineLevel[TimelineLevel["ERROR"] = 3] = "ERROR";
+    TimelineLevel[TimelineLevel["INFO"] = 6] = "INFO";
+    TimelineLevel[TimelineLevel["DEBUG"] = 7] = "DEBUG";
+})(TimelineLevel || (TimelineLevel = {}));
+/* harmony default export */ var timeline_level = (TimelineLevel);
+
+// CONCATENATED MODULE: ./src/core/timeline/timeline.ts
+
+
+
+class timeline_Timeline {
+    constructor(key, session, options) {
+        this.key = key;
+        this.session = session;
+        this.events = [];
+        this.options = options || {};
+        this.sent = 0;
+        this.uniqueID = 0;
+    }
+    log(level, event) {
+        if (level <= this.options.level) {
+            this.events.push(extend({}, event, { timestamp: util.now() }));
+            if (this.options.limit && this.events.length > this.options.limit) {
+                this.events.shift();
+            }
+        }
+    }
+    error(event) {
+        this.log(timeline_level.ERROR, event);
+    }
+    info(event) {
+        this.log(timeline_level.INFO, event);
+    }
+    debug(event) {
+        this.log(timeline_level.DEBUG, event);
+    }
+    isEmpty() {
+        return this.events.length === 0;
+    }
+    send(sendfn, callback) {
+        var data = extend({
+            session: this.session,
+            bundle: this.sent + 1,
+            key: this.key,
+            lib: 'js',
+            version: this.options.version,
+            cluster: this.options.cluster,
+            features: this.options.features,
+            timeline: this.events
+        }, this.options.params);
+        this.events = [];
+        sendfn(data, (error, result) => {
+            if (!error) {
+                this.sent++;
+            }
+            if (callback) {
+                callback(error, result);
+            }
+        });
+        return true;
+    }
+    generateUniqueID() {
+        this.uniqueID++;
+        return this.uniqueID;
+    }
+}
+
+// CONCATENATED MODULE: ./src/core/utils/flat_promise.ts
+function flatPromise() {
+    let resolve, reject;
+    const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return { promise, resolve, reject };
+}
+/* harmony default export */ var flat_promise = (flatPromise);
+
 // CONCATENATED MODULE: ./src/core/watchlist.ts
 
 
@@ -3852,17 +3863,6 @@ class watchlist_WatchlistFacade extends dispatcher_Dispatcher {
         });
     }
 }
-
-// CONCATENATED MODULE: ./src/core/utils/flat_promise.ts
-function flatPromise() {
-    let resolve, reject;
-    const promise = new Promise((res, rej) => {
-        resolve = res;
-        reject = rej;
-    });
-    return { promise, resolve, reject };
-}
-/* harmony default export */ var flat_promise = (flatPromise);
 
 // CONCATENATED MODULE: ./src/core/user.ts
 
@@ -4012,11 +4012,11 @@ class user_UserFacade extends dispatcher_Dispatcher {
 
 
 
-class pusher_Pusher {
+class pusher_Pingerchips {
     static ready() {
-        pusher_Pusher.isReady = true;
-        for (var i = 0, l = pusher_Pusher.instances.length; i < l; i++) {
-            pusher_Pusher.instances[i].connect();
+        pusher_Pingerchips.isReady = true;
+        for (var i = 0, l = pusher_Pingerchips.instances.length; i < l; i++) {
+            pusher_Pingerchips.instances[i].connect();
         }
     }
     static getClientFeatures() {
@@ -4034,7 +4034,7 @@ class pusher_Pusher {
         this.sessionID = worker_runtime.randomInt(1000000000);
         this.timeline = new timeline_Timeline(this.key, this.sessionID, {
             cluster: this.config.cluster,
-            features: pusher_Pusher.getClientFeatures(),
+            features: pusher_Pingerchips.getClientFeatures(),
             params: this.config.timelineParams || {},
             limit: 50,
             level: timeline_level.INFO,
@@ -4085,10 +4085,10 @@ class pusher_Pusher {
         this.connection.bind('error', err => {
             logger.warn(err);
         });
-        pusher_Pusher.instances.push(this);
-        this.timeline.info({ instances: pusher_Pusher.instances.length });
+        pusher_Pingerchips.instances.push(this);
+        this.timeline.info({ instances: pusher_Pingerchips.instances.length });
         this.user = new user_UserFacade(this);
-        if (pusher_Pusher.isReady) {
+        if (pusher_Pingerchips.isReady) {
             this.connect();
         }
     }
@@ -4178,20 +4178,20 @@ class pusher_Pusher {
         this.user.signin();
     }
 }
-pusher_Pusher.instances = [];
-pusher_Pusher.isReady = false;
-pusher_Pusher.logToConsole = false;
-pusher_Pusher.Runtime = worker_runtime;
-pusher_Pusher.ScriptReceivers = worker_runtime.ScriptReceivers;
-pusher_Pusher.DependenciesReceivers = worker_runtime.DependenciesReceivers;
-pusher_Pusher.auth_callbacks = worker_runtime.auth_callbacks;
-/* harmony default export */ var core_pusher = __webpack_exports__["default"] = (pusher_Pusher);
+pusher_Pingerchips.instances = [];
+pusher_Pingerchips.isReady = false;
+pusher_Pingerchips.logToConsole = false;
+pusher_Pingerchips.Runtime = worker_runtime;
+pusher_Pingerchips.ScriptReceivers = worker_runtime.ScriptReceivers;
+pusher_Pingerchips.DependenciesReceivers = worker_runtime.DependenciesReceivers;
+pusher_Pingerchips.auth_callbacks = worker_runtime.auth_callbacks;
+/* harmony default export */ var core_pusher = __webpack_exports__["default"] = (pusher_Pingerchips);
 function checkAppKey(key) {
     if (key === null || key === undefined) {
         throw 'You must pass your app key when you instantiate Pusher.';
     }
 }
-worker_runtime.setup(pusher_Pusher);
+worker_runtime.setup(pusher_Pingerchips);
 
 
 /***/ })

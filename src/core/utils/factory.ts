@@ -1,28 +1,24 @@
+import Handshake from '../connection/handshake';
 import AssistantToTheTransportManager from '../transports/assistant_to_the_transport_manager';
 import PingDelayOptions from '../transports/ping_delay_options';
 import Transport from '../transports/transport';
-import TransportManager from '../transports/transport_manager';
-import Handshake from '../connection/handshake';
 import TransportConnection from '../transports/transport_connection';
-import SocketHooks from '../http/socket_hooks';
-import HTTPSocket from '../http/http_socket';
+import TransportManager from '../transports/transport_manager';
 
+import * as nacl from 'tweetnacl';
+import Channel from '../channels/channel';
+import Channels from '../channels/channels';
+import EncryptedChannel from '../channels/encrypted_channel';
+import PresenceChannel from '../channels/presence_channel';
+import PrivateChannel from '../channels/private_channel';
+import ConnectionManager from '../connection/connection_manager';
+import ConnectionManagerOptions from '../connection/connection_manager_options';
+import Pingerchips from '../pingerchips';
 import Timeline from '../timeline/timeline';
 import {
   default as TimelineSender,
   TimelineSenderOptions
 } from '../timeline/timeline_sender';
-import PresenceChannel from '../channels/presence_channel';
-import PrivateChannel from '../channels/private_channel';
-import EncryptedChannel from '../channels/encrypted_channel';
-import Channel from '../channels/channel';
-import ConnectionManager from '../connection/connection_manager';
-import ConnectionManagerOptions from '../connection/connection_manager_options';
-import Ajax from '../http/ajax';
-import Channels from '../channels/channels';
-import Pusher from '../pusher';
-import { Config } from '../config';
-import * as nacl from 'tweetnacl';
 
 var Factory = {
   createChannels(): Channels {
@@ -36,21 +32,21 @@ var Factory = {
     return new ConnectionManager(key, options);
   },
 
-  createChannel(name: string, pusher: Pusher): Channel {
+  createChannel(name: string, pusher: Pingerchips): Channel {
     return new Channel(name, pusher);
   },
 
-  createPrivateChannel(name: string, pusher: Pusher): PrivateChannel {
+  createPrivateChannel(name: string, pusher: Pingerchips): PrivateChannel {
     return new PrivateChannel(name, pusher);
   },
 
-  createPresenceChannel(name: string, pusher: Pusher): PresenceChannel {
+  createPresenceChannel(name: string, pusher: Pingerchips): PresenceChannel {
     return new PresenceChannel(name, pusher);
   },
 
   createEncryptedChannel(
     name: string,
-    pusher: Pusher,
+    pusher: Pingerchips,
     nacl: nacl
   ): EncryptedChannel {
     return new EncryptedChannel(name, pusher, nacl);

@@ -9,13 +9,13 @@ var buffer = require('buffer');
 
 module.exports = merge({}, configShared, {
   entry: {
-    pusher: './src/core/pusher-with-encryption.js'
+    pingerchips: './src/core/pingerchips-with-encryption.js'
   },
   output: {
-    library: 'Pusher',
+    library: 'Pingerchips',
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/react-native'),
-    filename: 'pusher.js'
+    filename: 'pingerchips.js'
   },
   externals: {
     // our Reachability implementation needs to reference @react-native-community/netinfo.

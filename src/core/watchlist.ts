@@ -1,11 +1,11 @@
-import Logger from './logger';
-import Pusher from './pusher';
 import EventsDispatcher from './events/dispatcher';
+import Logger from './logger';
+import Pingerchips from './pingerchips';
 
 export default class WatchlistFacade extends EventsDispatcher {
-  private pusher: Pusher;
+  private pusher: Pingerchips;
 
-  public constructor(pusher: Pusher) {
+  public constructor(pusher: Pingerchips) {
     super(function(eventName, data) {
       Logger.debug(`No callbacks on watchlist events for ${eventName}`);
     });

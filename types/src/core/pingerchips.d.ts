@@ -1,16 +1,16 @@
 import AbstractRuntime from '../runtimes/interface';
-import Channels from './channels/channels';
 import Channel from './channels/channel';
+import Channels from './channels/channels';
+import { Config } from './config';
+import ConnectionManager from './connection/connection_manager';
 import { default as EventsDispatcher } from './events/dispatcher';
+import { Options } from './options';
 import Timeline from './timeline/timeline';
 import TimelineSender from './timeline/timeline_sender';
-import ConnectionManager from './connection/connection_manager';
-import { PeriodicTimer } from './utils/timers';
-import { Options } from './options';
-import { Config } from './config';
 import UserFacade from './user';
-export default class Pusher {
-    static instances: Pusher[];
+import { PeriodicTimer } from './utils/timers';
+export default class Pingerchips {
+    static instances: Pingerchips[];
     static isReady: boolean;
     static logToConsole: boolean;
     static Runtime: AbstractRuntime;
@@ -35,11 +35,11 @@ export default class Pusher {
     allChannels(): Channel[];
     connect(): void;
     disconnect(): void;
-    bind(event_name: string, callback: Function, context?: any): Pusher;
-    unbind(event_name?: string, callback?: Function, context?: any): Pusher;
-    bind_global(callback: Function): Pusher;
-    unbind_global(callback?: Function): Pusher;
-    unbind_all(callback?: Function): Pusher;
+    bind(event_name: string, callback: Function, context?: any): Pingerchips;
+    unbind(event_name?: string, callback?: Function, context?: any): Pingerchips;
+    bind_global(callback: Function): Pingerchips;
+    unbind_global(callback?: Function): Pingerchips;
+    unbind_all(callback?: Function): Pingerchips;
     subscribeAll(): void;
     subscribe(channel_name: string): Channel;
     unsubscribe(channel_name: string): void;

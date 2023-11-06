@@ -1,5 +1,5 @@
+import Pingerchips from './pingerchips';
 import { stringify } from './utils/collections';
-import Pusher from './pusher';
 
 class Logger {
   debug(...args: any[]) {
@@ -41,9 +41,9 @@ class Logger {
     ...args: any[]
   ) {
     var message = stringify.apply(this, arguments);
-    if (Pusher.log) {
-      Pusher.log(message);
-    } else if (Pusher.logToConsole) {
+    if (Pingerchips.log) {
+      Pingerchips.log(message);
+    } else if (Pingerchips.logToConsole) {
       const log = defaultLoggingFunction.bind(this);
       log(message);
     }

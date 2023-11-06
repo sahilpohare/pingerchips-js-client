@@ -1,6 +1,6 @@
-import { Options } from './options';
-import { ChannelAuthorizationHandler, UserAuthenticationHandler } from './auth/options';
 import * as nacl from 'tweetnacl';
+import { ChannelAuthorizationHandler, UserAuthenticationHandler } from './auth/options';
+import { Options } from './options';
 export type AuthTransport = 'ajax' | 'jsonp';
 export type Transport = 'ws' | 'wss' | 'xhr_streaming' | 'xhr_polling' | 'sockjs';
 export interface Config {

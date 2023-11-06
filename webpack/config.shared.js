@@ -3,7 +3,7 @@
 var webpack = require('webpack');
 var fs = require('fs');
 var Config = require('./hosting_config');
-var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8');
+var banner = fs.readFileSync('./src/core/pingerchips-licence.js', 'utf8');
 banner = banner.replace('<VERSION>', Config.version);
 
 var minimize = process.env.MINIMIZE === 'false' ? false : true;
@@ -14,7 +14,7 @@ module.exports = {
     minimize: minimize
   },
   entry: {
-    pusher: './src/core/pusher.js'
+    pingerchips: './src/core/pusher.js'
   },
   devtool: 'source-map',
   resolve: {

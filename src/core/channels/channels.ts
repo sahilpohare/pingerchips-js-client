@@ -1,11 +1,10 @@
-import Channel from './channel';
-import * as Collections from '../utils/collections';
-import ChannelTable from './channel_table';
-import Factory from '../utils/factory';
-import Pusher from '../pusher';
-import Logger from '../logger';
 import * as Errors from '../errors';
+import Pingerchips from '../pingerchips';
+import * as Collections from '../utils/collections';
+import Factory from '../utils/factory';
 import urlStore from '../utils/url_store';
+import Channel from './channel';
+import ChannelTable from './channel_table';
 
 /** Handles a channel map. */
 export default class Channels {
@@ -18,10 +17,10 @@ export default class Channels {
   /** Creates or retrieves an existing channel by its name.
    *
    * @param {String} name
-   * @param {Pusher} pusher
+   * @param {Pingerchips} pusher
    * @return {Channel}
    */
-  add(name: string, pusher: Pusher) {
+  add(name: string, pusher: Pingerchips) {
     if (!this.channels[name]) {
       this.channels[name] = createChannel(name, pusher);
     }
@@ -63,7 +62,7 @@ export default class Channels {
   }
 }
 
-function createChannel(name: string, pusher: Pusher): Channel {
+function createChannel(name: string, pusher: Pingerchips): Channel {
   if (name.indexOf('private-encrypted-') === 0) {
     if (pusher.config.nacl) {
       return Factory.createEncryptedChannel(name, pusher, pusher.config.nacl);

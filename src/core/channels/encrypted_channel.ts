@@ -1,27 +1,26 @@
-import PrivateChannel from './private_channel';
+import { decode as decodeBase64 } from '@stablelib/base64';
+import { decode as encodeUTF8 } from '@stablelib/utf8';
+import * as nacl from 'tweetnacl';
+import {
+  ChannelAuthorizationCallback,
+  ChannelAuthorizationData
+} from '../auth/options';
+import { PusherEvent } from '../connection/protocol/message-types';
 import * as Errors from '../errors';
 import Logger from '../logger';
-import Pusher from '../pusher';
-import { decode as encodeUTF8 } from '@stablelib/utf8';
-import { decode as decodeBase64 } from '@stablelib/base64';
-import Dispatcher from '../events/dispatcher';
-import { PusherEvent } from '../connection/protocol/message-types';
-import {
-  ChannelAuthorizationData,
-  ChannelAuthorizationCallback
-} from '../auth/options';
-import * as nacl from 'tweetnacl';
+import Pingerchips from '../pingerchips';
+import PrivateChannel from './private_channel';
 
 /** Extends private channels to provide encrypted channel interface.
  *
  * @param {String} name
- * @param {Pusher} pusher
+ * @param {Pingerchips} pusher
  */
 export default class EncryptedChannel extends PrivateChannel {
   key: Uint8Array = null;
   nacl: nacl;
 
-  constructor(name: string, pusher: Pusher, nacl: nacl) {
+  constructor(name: string, pusher: Pingerchips, nacl: nacl) {
     super(name, pusher);
     this.nacl = nacl;
   }

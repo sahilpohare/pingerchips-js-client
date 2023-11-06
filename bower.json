@@ -1,6 +1,6 @@
 {
-  "name": "pusher-js",
-  "location": "git://github.com/pusher/pusher-js.git",
+  "name": "pingerchips-js",
+  "location": "https://github.com/sahilpohare/pingerchips-js-client.git",
   "description": "Pusher JavaScript library for browsers, React Native, NodeJS and web workers",
   "keywords": [
     "pusher",
@@ -13,7 +13,16 @@
     "pubsub"
   ],
   "licence": "MIT",
-  "authors": ["Pusher <support@pusher.com>"],
+  "authors": [
+    "Pingerchips <team@pingerchips.com>"
+  ],
   "main": "./dist/web/pusher.js",
-  "ignore": ["**/*", "!/dist/**/*", "!LICENCE", "!README.markdown", "!bower.json", "!CHANGELOG.markdown"]
+  "ignore": [
+    "**/*",
+    "!/dist/**/*",
+    "!LICENCE",
+    "!README.markdown",
+    "!bower.json",
+    "!CHANGELOG.markdown"
+  ]
 }

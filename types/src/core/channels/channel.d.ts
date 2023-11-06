@@ -1,15 +1,15 @@
-import { default as EventsDispatcher } from '../events/dispatcher';
-import Pusher from '../pusher';
-import { PusherEvent } from '../connection/protocol/message-types';
 import { ChannelAuthorizationCallback } from '../auth/options';
+import { PusherEvent } from '../connection/protocol/message-types';
+import { default as EventsDispatcher } from '../events/dispatcher';
+import Pingerchips from '../pingerchips';
 export default class Channel extends EventsDispatcher {
     name: string;
-    pusher: Pusher;
+    pusher: Pingerchips;
     subscribed: boolean;
     subscriptionPending: boolean;
     subscriptionCancelled: boolean;
     subscriptionCount: null;
-    constructor(name: string, pusher: Pusher);
+    constructor(name: string, pusher: Pingerchips);
     authorize(socketId: string, callback: ChannelAuthorizationCallback): void;
     trigger(event: string, data: any): boolean;
     disconnect(): void;
